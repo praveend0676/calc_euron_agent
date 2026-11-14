@@ -3,7 +3,7 @@
 [![Python](https://img.shields.io/badge/Python-3.13-blue)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-green)](https://fastapi.tiangolo.com/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue)](https://www.docker.com/)
-[![Tests](https://img.shields.io/badge/Tests-40%20passing-brightgreen)](tests/)
+[![Tests](https://img.shields.io/badge/Tests-68%20passing-brightgreen)](tests/)
 
 A full-stack calculator application built with **FastAPI** (backend), **Docker** (containerization), and **vanilla HTML/CSS/JS** (frontend).
 
@@ -15,7 +15,7 @@ A full-stack calculator application built with **FastAPI** (backend), **Docker**
 - **Web frontend** with a clean dark-theme calculator UI
 - **Keyboard support** for desktop use
 - **Docker support** — run the entire app in a single container
-- **40 passing tests** — unit tests for math logic, integration tests for API and frontend
+- **68 passing tests** — unit tests for math logic, integration tests for API and frontend
 
 ---
 
@@ -64,7 +64,7 @@ calculator/
 ├── tests/
 │   ├── __init__.py
 │   ├── test_calculator.py  # Unit tests for math functions (25 tests)
-│   └── test_api.py         # Integration tests for API & frontend (15 tests)
+│   └── test_api.py         # Integration tests for API & frontend (43 tests)
 ├── Dockerfile              # Docker image definition
 ├── .dockerignore           # Docker build exclusions
 ├── requirements.txt        # Python dependencies
@@ -135,7 +135,7 @@ The frontend is a single-page app served from `http://localhost:8000` that calls
 ```
 tests/
 ├── test_calculator.py   # 25 unit tests for pure math functions
-├── test_api.py          # 15 integration tests (API + frontend serving)
+├── test_api.py          # 43 integration tests (API + frontend serving)
 ```
 
 Run the full suite:
@@ -144,7 +144,7 @@ Run the full suite:
 python -m pytest tests/ -v
 ```
 
-Expected output: **40 passed**
+Expected output: **68 passed**
 
 ---
 
@@ -175,15 +175,19 @@ See [EVALUATION.md](EVALUATION.md) for a full analysis of the AI-assisted develo
 
 ## Prompt Comparison
 
-| Prompt instruction | How this project implements it |
-|---|---|
-| "Use FastAPI with Uvicorn" | `app/main.py` creates a `FastAPI()` app; `uvicorn` is listed in `requirements.txt` |
-| "Provide `/health` endpoint" | `GET /health` returns `{"status": "ok"}` |
-| "Provide `/calculate` and `/history` endpoints" | `POST /calculate` and `GET /history` in `app/main.py` |
-| "Use restricted eval for expressions" | `app/calculator.py` uses `safe_eval()` with `__builtins__={}` |
-| "Max 20 history entries" | `MAX_HISTORY = 20` in `app/main.py`; older entries are dropped |
-| "Serve frontend at `/`" | `serve_frontend()` mounted at `/` in `app/main.py` |
-| "Use Docker with multi-stage build" | `Dockerfile` uses builder + runtime stages |
+### Vague vs. Precise Prompt
+
+| Aspect | Vague prompt | Precise prompt (this project) |
+|---|---|---|
+| **Scope** | "Build a calculator" | 6 numbered parts: FastAPI, Docker, Web UI, Evaluation, README, Validation |
+| **Framework** | Unspecified | FastAPI + Uvicorn, Python 3.13, vanilla HTML/CSS/JS |
+| **Endpoints** | Not mentioned | `/health`, `/add`, `/subtract`, `/multiply`, `/divide`, `/power`, `/sqrt`, `/modulus`, `/calculate`, `/history` |
+| **Security** | Not mentioned | No `eval()`, recursive descent parser, input validation |
+| **Docker** | Not mentioned | Multi-stage build, slim image, non-root user, cached deps |
+| **Testing** | Not mentioned | 25 unit tests + 43 integration tests = 68 total |
+| **Result** | Incomplete, inconsistent code | Fully working, tested, containerized app (~1725 LOC) |
+
+**Takeaway:** A precise prompt with numbered parts, explicit requirements, and verification steps produces production-ready code. A vague prompt leaves framework choice, security, testing and deployment undefined.
 
 ## Reviewed Correction
 
@@ -209,5 +213,16 @@ During development the following corrections were applied after review:
 | `Dockerfile` | ~25 |
 | `requirements.txt` | ~10 |
 | **Total** | **~1725** |
+
+### Before / After
+
+| Metric | Before (empty project) | After (completed) |
+|---|---|---|
+| **Files** | 0 | 17 (code, test, config, docs) |
+| **Lines of code** | 0 | ~1725 |
+| **Endpoints** | 0 | 10 (8 math + `/calculate` + `/history` + `/health`) |
+| **Tests** | 0 | 68 passing |
+| **Docker image** | none | multi-stage, < 200 MB |
+| **Security** | — | no `eval()`, input validation, non-root container |
 
 The project was built within the token allowance for a single AI coding session.
