@@ -23,3 +23,26 @@ class CalcResponse(BaseModel):
 class ErrorResponse(BaseModel):
     """Error response body."""
     detail: str = Field(..., description="Human-readable error message")
+
+
+class CalculateRequest(BaseModel):
+    """Request body for the unified calculate endpoint."""
+    expression: str = Field(..., description="Mathematical expression string")
+
+
+class CalculateResponse(BaseModel):
+    """Response for the unified calculate endpoint."""
+    expression: str = Field(..., description="Original expression sent by the client")
+    result: int | float = Field(..., description="Computed numeric result")
+
+
+class HistoryEntry(BaseModel):
+    """A single history entry."""
+    expression: str
+    result: int | float
+    timestamp: str
+
+
+class HistoryResponse(BaseModel):
+    """List of history entries."""
+    history: list[HistoryEntry]

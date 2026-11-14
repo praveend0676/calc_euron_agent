@@ -7,7 +7,8 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir --user -r requirements.txt
+ENV PIP_USER=false
+RUN pip install --no-cache-dir -r requirements.txt
 
 # --- runtime ---
 
@@ -29,8 +30,7 @@ EXPOSE 8000
 
 WORKDIR /app
 
-COPY --from=builder /root/.local /root/.local
-ENV PATH=/root/.local/bin:$PATH
+COPY --from=builder /usr/local/lib/python3.13/site-packages/ /usr/local/lib/python3.13/site-packages/
 
 COPY . .
 

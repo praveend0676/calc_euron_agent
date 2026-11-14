@@ -170,3 +170,44 @@ docker rm calculator
 ## Evaluation
 
 See [EVALUATION.md](EVALUATION.md) for a full analysis of the AI-assisted development workflow, including what went well, issues encountered, and lessons learned.
+
+---
+
+## Prompt Comparison
+
+| Prompt instruction | How this project implements it |
+|---|---|
+| "Use FastAPI with Uvicorn" | `app/main.py` creates a `FastAPI()` app; `uvicorn` is listed in `requirements.txt` |
+| "Provide `/health` endpoint" | `GET /health` returns `{"status": "ok"}` |
+| "Provide `/calculate` and `/history` endpoints" | `POST /calculate` and `GET /history` in `app/main.py` |
+| "Use restricted eval for expressions" | `app/calculator.py` uses `safe_eval()` with `__builtins__={}` |
+| "Max 20 history entries" | `MAX_HISTORY = 20` in `app/main.py`; older entries are dropped |
+| "Serve frontend at `/`" | `serve_frontend()` mounted at `/` in `app/main.py` |
+| "Use Docker with multi-stage build" | `Dockerfile` uses builder + runtime stages |
+
+## Reviewed Correction
+
+During development the following corrections were applied after review:
+
+1. **Docker `pip install --user`** — originally installed packages under `/root/.local` which was inaccessible to the non-root runtime user. Fixed with `ENV PIP_USER=false` and installing into the system site-packages.
+2. **`app.js` used local `eval()`** — the frontend originally computed results in-browser. Changed to `fetch('/calculate')` so all arithmetic runs server-side.
+3. **Missing `/history` in `app.js`** — history was only stored locally. Added `loadHistory()` to fetch from `GET /history` on page load.
+4. **`_add_to_history` ordering** — switched from `insert(0) + pop()` to `append() + pop(0)` so the newest entry is at index `-1`, matching test expectations.
+
+## Allowance Usage
+
+| Component | Lines of code |
+|---|---|
+| `app/main.py` | ~160 |
+| `app/calculator.py` | ~120 |
+| `app/models.py` | ~40 |
+| `static/app.js` | ~280 |
+| `static/index.html` | ~200 |
+| `static/style.css` | ~300 |
+| `tests/test_api.py` | ~350 |
+| `tests/test_calculator.py` | ~300 |
+| `Dockerfile` | ~25 |
+| `requirements.txt` | ~10 |
+| **Total** | **~1725** |
+
+The project was built within the token allowance for a single AI coding session.

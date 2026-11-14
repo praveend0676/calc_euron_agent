@@ -5,9 +5,19 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from . import calculator as calc
-from .models import CalcResponse, ErrorResponse, OperationRequest, SingleOperandRequest
+from .models import (
+    CalcResponse,
+    CalculateRequest,
+    CalculateResponse,
+    ErrorResponse,
+    HistoryEntry,
+    HistoryResponse,
+    OperationRequest,
+    SingleOperandRequest,
+)
 
 import os
+from datetime import datetime, timezone
 
 app = FastAPI(
     title="Calculator API",
@@ -18,6 +28,16 @@ app = FastAPI(
 # -- Static files (frontend) --------------------------------------------------
 STATIC_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static")
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+# -- In-memory history ---------------------------------------------------------
+MAX_HISTORY = 20
+_history: list[dict] = []
+
+
+def _add_to_history(expression: str, result: float) -> None:
+    _history.append({"expression": expression, "result": result, "timestamp": datetime.now(timezone.utc).isoformat()})
+    if len(_history) > MAX_HISTORY:
+        _history.pop(0)
 
 
 @app.get("/")
@@ -89,3 +109,23 @@ def negate(body: SingleOperandRequest) -> CalcResponse:
 @app.get("/health")
 def health() -> dict:
     return {"status": "ok"}
+
+
+# -- Unified expression evaluation & history ----------------------------------
+
+
+@app.post("/calculate", response_model=CalculateResponse)
+def calculate(body: CalculateRequest) -> CalculateResponse:
+    try:
+        result = calc.parse_and_compute(body.expression)
+    except (ValueError, ZeroDivisionError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    _add_to_history(body.expression, result)
+    return CalculateResponse(expression=body.expression, result=result)
+
+
+@app.get("/history", response_model=HistoryResponse)
+def get_history() -> HistoryResponse:
+    return HistoryResponse(
+        history=[HistoryEntry(**entry) for entry in _history]
+    )
