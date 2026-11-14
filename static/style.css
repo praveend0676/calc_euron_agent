@@ -114,3 +114,58 @@ button[data-action="clear"]:hover {
   text-align: center;
   min-height: 1.2em;
 }
+
+/* -- History -- */
+
+.history {
+  max-height: 120px;
+  overflow-y: auto;
+  margin-bottom: 12px;
+  border: 1px solid #2c2c2c;
+  border-radius: 8px;
+  background: #0d0d0d;
+  display: flex;
+  flex-direction: column;
+}
+
+.history-entry {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  color: #888;
+  border-bottom: 1px solid #1a1a1a;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+}
+
+.history-entry:last-child {
+  border-bottom: none;
+}
+
+.history-entry:hover {
+  background: #1a1a1a;
+  color: #ccc;
+}
+
+.history-expression {
+  color: #555;
+}
+
+.history-result {
+  font-weight: 600;
+  color: #aaa;
+}
+
+/* Scrollbar styling */
+.history::-webkit-scrollbar {
+  width: 4px;
+}
+
+.history::-webkit-scrollbar-track {
+  background: #0d0d0d;
+}
+
+.history::-webkit-scrollbar-thumb {
+  background: #2c2c2c;
+  border-radius: 2px;
+}

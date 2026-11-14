@@ -35,6 +35,11 @@ def square_root(value: float) -> float:
     return round(value ** 0.5, 10)
 
 
+def negate(value: float) -> float:
+    """Negate a number."""
+    return -value
+
+
 def modulus(a: float, b: float) -> float:
     """Return a modulo b. Raises ZeroDivisionError if b is zero."""
     if b == 0:

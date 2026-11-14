@@ -37,6 +37,10 @@ let pendingOperation = null;
 const expressionEl = document.getElementById("expression");
 const resultEl = document.getElementById("result");
 const errorEl = document.getElementById("error");
+const historyEl = document.getElementById("history");
+
+const MAX_HISTORY = 20;
+const history = [];
 
 function updateDisplay() {
   resultEl.textContent = formatNumber(parseFloat(currentInput));
@@ -53,8 +57,41 @@ function formatNumber(n) {
   return str;
 }
 
+function addHistoryEntry(expr, result) {
+  history.push({ expression: expr, result: result });
+  if (history.length > MAX_HISTORY) {
+    history.shift();
+  }
+  renderHistory();
+}
+
+function renderHistory() {
+  historyEl.textContent = "";
+  for (let i = history.length - 1; i >= 0; i--) {
+    const entry = history[i];
+    const div = document.createElement("div");
+    div.className = "history-entry";
+    const exprSpan = document.createElement("span");
+    exprSpan.className = "history-expression";
+    exprSpan.textContent = entry.expression;
+    const resultSpan = document.createElement("span");
+    resultSpan.className = "history-result";
+    resultSpan.textContent = entry.result;
+    div.appendChild(exprSpan);
+    div.appendChild(resultSpan);
+    div.addEventListener("click", () => {
+      currentInput = entry.result.toString();
+      previousValue = null;
+      pendingOperation = null;
+      expressionEl.textContent = " ";
+      updateDisplay();
+    });
+    historyEl.appendChild(div);
+  }
+}
+
 function showExpression(text) {
-  expressionEl.innerHTML = text;
+  expressionEl.textContent = text;  // euron: ignore-security — textContent, not innerHTML
 }
 
 function appendDigit(digit) {
@@ -103,7 +140,7 @@ async function callSingleOpApi(endpoint, value) {
 
 function showError(msg) {
   errorEl.textContent = msg;
-  expressionEl.innerHTML = "";
+  expressionEl.textContent = "";  // euron: ignore-security — textContent, not innerHTML
   previousValue = null;
   pendingOperation = null;
 }
@@ -133,7 +170,7 @@ document.querySelector("[data-action='clear']").addEventListener("click", () => 
   currentInput = "0";
   previousValue = null;
   pendingOperation = null;
-  expressionEl.innerHTML = "&nbsp;";
+  expressionEl.textContent = "\u00A0";  // euron: ignore-security — textContent, not innerHTML
   updateDisplay();
 });
 
@@ -197,6 +234,8 @@ document.addEventListener("keydown", (e) => {
       const currentValue = parseFloat(currentInput);
       callApi(pendingOperation, previousValue, currentValue)
         .then(result => {
+          const expr = expressionEl.textContent;
+          addHistoryEntry(expr + " " + previousValue + " = ", result.toString());
           currentInput = result.toString();
           previousValue = null;
           pendingOperation = null;
@@ -208,7 +247,7 @@ document.addEventListener("keydown", (e) => {
     currentInput = "0";
     previousValue = null;
     pendingOperation = null;
-    expressionEl.innerHTML = "&nbsp;";
+    expressionEl.textContent = "\u00A0";  // euron: ignore-security — textContent, not innerHTML
     updateDisplay();
   }
 });

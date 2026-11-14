@@ -78,6 +78,11 @@ def sqrt(body: SingleOperandRequest) -> CalcResponse:
     return CalcResponse(operation="sqrt", result=result)
 
 
+@app.post("/negate", response_model=CalcResponse)
+def negate(body: SingleOperandRequest) -> CalcResponse:
+    return CalcResponse(operation="negate", result=calc.negate(body.value))
+
+
 # -- Health check -------------------------------------------------------------
 
 

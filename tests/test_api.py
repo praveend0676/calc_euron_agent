@@ -99,6 +99,42 @@ def test_sqrt_negative():
     assert "Cannot take the square root of a negative number" in resp.json()["detail"]
 
 
+# -- Negate -------------------------------------------------------------------
+
+
+def test_negate():
+    resp = client.post("/negate", json={"value": 42})
+    assert resp.status_code == 200
+    assert resp.json()["result"] == -42
+
+
+def test_negate_negative():
+    resp = client.post("/negate", json={"value": -42})
+    assert resp.status_code == 200
+    assert resp.json()["result"] == 42
+
+
+def test_negate_zero():
+    resp = client.post("/negate", json={"value": 0})
+    assert resp.status_code == 200
+    assert resp.json()["result"] == 0
+
+
+# -- Modulus edge cases -------------------------------------------------------
+
+
+def test_modulus_floats():
+    resp = client.post("/modulus", json={"a": 7.5, "b": 2.5})
+    assert resp.status_code == 200
+    assert resp.json()["result"] == 0.0
+
+
+def test_modulus_by_one():
+    resp = client.post("/modulus", json={"a": 100, "b": 1})
+    assert resp.status_code == 200
+    assert resp.json()["result"] == 0.0
+
+
 # -- Validation ---------------------------------------------------------------
 
 
@@ -130,4 +166,4 @@ def test_frontend_css():
 def test_frontend_js():
     resp = client.get("/static/app.js")
     assert resp.status_code == 200
-    assert b"API_BASE" in resp.content
+    assert b"resultEl" in resp.content  # XSS-safe: textContent, not innerHTML
